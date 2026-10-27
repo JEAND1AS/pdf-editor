@@ -1,76 +1,73 @@
-# React + TypeScript + Vite
+# PDF Studio
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Um editor de PDF no navegador para fazer ajustes rápidos sem precisar instalar um programa. Carregue um PDF, edite textos detectados ou adicione uma caixa de cobertura e baixe uma nova versão do arquivo.
 
-Currently, two official plugins are available:
+![Prévia do PDF Studio](docs/images/pdf-studio-editor.png)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## O que ele faz
 
-## React Compiler
+- Abre arquivos PDF diretamente no navegador.
+- Navega entre as páginas do documento.
+- Detecta a camada de texto de PDFs digitais para iniciar uma edição no mesmo ponto da página.
+- Permite criar caixas de texto de cobertura, mover, redimensionar e alterar o tamanho da fonte.
+- Mantém um histórico local de desfazer/refazer durante a sessão.
+- Exporta uma cópia editada para download.
+- Oferece um documento de exemplo para experimentar a interface.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+> Os arquivos permanecem no navegador durante o uso: o projeto não envia PDFs para um servidor.
 
-## Expanding the ESLint configuration
+## Tecnologias
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+| Tecnologia | Uso |
+| --- | --- |
+| React + TypeScript | Interface e lógica da aplicação |
+| Vite | Ambiente de desenvolvimento e build |
+| Tailwind CSS 4 | Estilos utilitários e responsividade |
+| PDF.js | Renderização e leitura da camada de texto |
+| pdf-lib | Geração do PDF exportado |
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Como executar
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Pré-requisito: Node.js 20 ou superior.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+Depois, abra a URL exibida pelo Vite (normalmente `http://localhost:5173`). Para criar a versão de produção:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm run build
 ```
-# pdf-editor
+
+## Como editar um PDF
+
+1. Clique em **Novo arquivo** ou solte um arquivo PDF na área de upload.
+2. Escolha **Edição direta** e clique em um trecho destacado para trocar seu conteúdo.
+3. Se o PDF não tiver texto selecionável, escolha **Texto de cobertura** e clique na página para adicionar uma caixa sobre o conteúdo original.
+4. Arraste a caixa para reposicioná-la; use o canto inferior direito para alterar suas dimensões.
+5. Use **Exportar PDF** para baixar o resultado.
+
+## Limitações atuais
+
+- PDFs escaneados normalmente não têm camada de texto. Neles, use caixas de cobertura.
+- A exportação cobre o trecho anterior com um fundo branco e desenha o novo texto. Fundos coloridos, imagens e tipografias incorporadas podem exigir ajustes manuais.
+- O limite mostrado na interface é de 25 MB; o desempenho também depende da memória disponível no navegador.
+
+## Estrutura
+
+```text
+src/App.tsx               Interface, edição e exportação
+src/index.css             Entrada do Tailwind CSS
+docs/images/              Imagens usadas na documentação
+```
+
+## Scripts
+
+| Comando | Descrição |
+| --- | --- |
+| `npm run dev` | Inicia o ambiente local com recarregamento automático |
+| `npm run build` | Verifica os tipos e gera o build de produção |
+| `npm run lint` | Executa o ESLint |
+| `npm run preview` | Serve o build de produção localmente |
