@@ -14,17 +14,35 @@ Um editor de PDF no navegador para fazer ajustes rápidos sem precisar instalar 
 - Exporta uma cópia editada para download.
 - Oferece um documento de exemplo para experimentar a interface.
 
-> Os arquivos permanecem no navegador durante o uso: o projeto não envia PDFs para um servidor.
+> O editor atual continua funcionando localmente no navegador. A API opcional adicionada ao projeto permite contas e armazenamento protegido por usuário.
+
+## API segura (contas e documentos)
+
+O projeto agora é dividido em `frontend/` (React/Vite) e `backend/` (Fastify/SQLite). O backend disponibiliza cadastro, login, sessão e upload de PDFs. Cada rota de documento exige uma sessão válida e consulta o proprietário no banco antes de listar, baixar ou excluir o arquivo.
+
+```bash
+cp backend/.env.example backend/.env
+# Preencha COOKIE_SECRET com: openssl rand -base64 48
+npm run api
+```
+
+Em outro terminal, use `npm run dev` para a interface. O Vite encaminha `/api` e `/health` ao backend local por padrão. Para chamadas autenticadas, primeiro obtenha `GET /api/auth/csrf` e envie o token retornado no cabeçalho `X-CSRF-Token` em toda requisição que altera estado.
+
+Principais rotas: `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`, `GET/POST /api/documents`, `GET /api/documents/:id`, `PUT /api/documents/:id/edits`, `GET /api/documents/:id/download` e `DELETE /api/documents/:id`.
+
+O frontend já usa essas rotas: após entrar, novos PDFs são enviados para a conta, documentos salvos podem ser reabertos e o botão **Salvar** persiste as caixas de edição. A exportação também salva as alterações antes de gerar o download.
+
+O backend usa Argon2id para senhas, cookies `HttpOnly`/`SameSite=Strict` (e `Secure` em produção), tokens anti-CSRF, limites de tentativa e upload, CORS restrito à origem configurada, cabeçalhos HTTP de proteção e identificadores aleatórios. Dados e PDFs são guardados em `backend/data/`, que não é versionado. Em produção, defina `NODE_ENV=production`, uma origem HTTPS em `CLIENT_ORIGIN`, um segredo exclusivo fora do repositório e execute atrás de HTTPS; só habilite `TRUST_PROXY=true` se houver um proxy reverso confiável.
 
 ## Tecnologias
 
-| Tecnologia | Uso |
-| --- | --- |
-| React + TypeScript | Interface e lógica da aplicação |
-| Vite | Ambiente de desenvolvimento e build |
-| Tailwind CSS 4 | Estilos utilitários e responsividade |
-| PDF.js | Renderização e leitura da camada de texto |
-| pdf-lib | Geração do PDF exportado |
+| Tecnologia         | Uso                                       |
+| ------------------ | ----------------------------------------- |
+| React + TypeScript | Interface e lógica da aplicação           |
+| Vite               | Ambiente de desenvolvimento e build       |
+| Tailwind CSS 4     | Estilos utilitários e responsividade      |
+| PDF.js             | Renderização e leitura da camada de texto |
+| pdf-lib            | Geração do PDF exportado                  |
 
 ## Como executar
 
@@ -58,16 +76,18 @@ npm run build
 ## Estrutura
 
 ```text
-src/App.tsx               Interface, edição e exportação
-src/index.css             Entrada do Tailwind CSS
+frontend/src/App.tsx      Interface, edição e exportação
+frontend/src/index.css    Entrada do Tailwind CSS
+backend/src/              API, autenticação e armazenamento
 docs/images/              Imagens usadas na documentação
 ```
 
 ## Scripts
 
-| Comando | Descrição |
-| --- | --- |
-| `npm run dev` | Inicia o ambiente local com recarregamento automático |
-| `npm run build` | Verifica os tipos e gera o build de produção |
-| `npm run lint` | Executa o ESLint |
-| `npm run preview` | Serve o build de produção localmente |
+| Comando           | Descrição                                             |
+| ----------------- | ----------------------------------------------------- |
+| `npm run dev`     | Inicia o ambiente local com recarregamento automático |
+| `npm run api`     | Inicia a API do backend                               |
+| `npm run build`   | Verifica os tipos e gera o build de produção          |
+| `npm run lint`    | Executa o ESLint                                      |
+| `npm run preview` | Serve o build de produção localmente                  |
